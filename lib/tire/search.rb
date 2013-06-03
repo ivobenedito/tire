@@ -16,6 +16,11 @@ module Tire
         @types   = Array(options.delete(:type)).map { |type| Utils.escape(type) }
         @options = options
 
+        page     = options.delete(:page)
+        per_page = options.delete(:per_page) || Tire::Results::Pagination::default_per_page
+        size( per_page.to_i ) if per_page
+        from( page.to_i <= 1 ? 0 : (per_page.to_i * (page.to_i-1)) ) if page && per_page
+
         @path    = ['/', @indices.join(','), @types.join(','), '_search'].compact.join('/').squeeze('/')
 
         block.arity < 1 ? instance_eval(&block) : block.call(self) if block_given?
